@@ -1,0 +1,151 @@
+<Gauge Name="JELAIR Vspeeds" Version="1.0">
+	<Image Name="250x25_Vspeed_Background.bmp" ImageSizes="250,25,250,25"/>
+	<Element><Select><Value>
+
+		(A:RADIO HEIGHT,feet) 50 &lt;
+		if{
+			1 (&gt;G:Var9)
+		}
+		els{
+			0 (&gt;G:Var9)
+		}
+
+
+		(A:AIRSPEED INDICATED,knots) 60 &lt;
+		if{
+			1 (&gt;G:Var8)
+		}
+
+
+	</Value></Select></Element>
+	<Comment>
+	Switch gauge on or off so you dont get callouts when airborne
+	</Comment>
+	<!-- JEL environmental variables -->
+	<Element Name="Environmental variables">
+		<Element><Select><Value>
+	(A:TOTAL WEIGHT,pound) (A:EMPTY WEIGHT,pound) - (&gt;G:Var1)
+	</Value></Select></Element>
+		<Comment>Calculates current payload and fuel weight</Comment>
+		<Element><Select><Value>
+	155 (&gt;G:Var2)
+	</Value></Select></Element>
+		<Comment>This is the generic default-V1 setting</Comment>
+		<Element><Select><Value>
+	(G:Var1) 9000 div (G:Var2) + (&gt;G:Var3)
+	</Value></Select></Element>
+		<Comment>divide payload-weight with 10,000 and add the default V1speed</Comment>
+		<Comment>the result here is the estimated flaps0 V1speed</Comment>
+		<Element><Select><Value>
+	(A:TRAILING EDGE FLAPS LEFT ANGLE,degrees) 3 * (&gt;G:Var7)
+	</Value></Select></Element>
+		<Comment>Set flaps-factorlevel for later use</Comment>
+		<Element><Select><Value>
+	(G:Var3) (G:Var7) - (&gt;G:Var4)
+	</Value></Select></Element>
+		<Comment>subtract flaps-factorlevel from estimated flaps0 V1speed</Comment>
+		<Comment>the result here is the estimated current config V1speed</Comment>
+		<Element><Select><Value>
+	(G:Var4) 5 + (&gt;G:Var5)
+	</Value></Select></Element>
+		<Comment>add this to estimated flaps0 Vr speed</Comment>
+		<Comment>the result here is the estimated current config Vr speed</Comment>
+		<Element><Select><Value>
+	(G:Var4) 15 + (&gt;G:Var6)
+	</Value></Select></Element>
+		<Comment>add this to estimated flaps0 V2 speed</Comment>
+		<Comment>the result here is the estimated current config V2 speed</Comment>
+	</Element>
+	<Comment>This is where the environmental variables are defined</Comment>
+	<Comment>
+(G:Var1) is payload+fuel weight
+(G:Var2) is generic default V1 speed (same for all aircraft)
+(G:Var3) is the estimated flaps0 V1 speed (based on aircraft weight)
+
+(G:Var4) is V1 speed
+(G:Var5) is Vr speed
+(G:Var6) is V2 speed
+
+(G:Var7) is flaps storage variable
+
+(G:Var8) is speed-lock (so the same sound isnt played twice)
+(G:Var9) is gauge on/off master-check
+</Comment>
+	<!-- JELselectMFDscreen #1 -->
+	<Element Name="MFDscreen1">
+		<Element><Position X="0" Y="0"/>
+			<Text X="250" Y="22" Length="30" Font="Arial" Color="Red" Bright="Yes" Adjust="Center" VerticalAdjust="Center" Multiline="No">
+				<String>V1 %((G:Var4))%!d! / Vr %((G:Var5))%!d! / V2 %((G:Var6))%!d!</String>
+			</Text></Element>
+		<Comment>Shows Vspeeds for current flap and weight config</Comment>
+	</Element>
+	<Comment>This is the visual stuff</Comment>
+	<!-- JEL gauge sound -->
+	<Element Name="Gauge sound">
+		<Element><Select><Value>
+	(G:Var9) 1 == if{
+
+
+        (A:AIRSPEED INDICATED,knots) 80 &gt;=
+	if{ 
+		(G:Var8) 1 ==
+		if{ 
+			1 (&gt;L:JELAIR_xml_Vspeed_sound_80knots,enum)
+			2 (&gt;G:Var8) 
+		} 
+	}
+
+        (A:AIRSPEED INDICATED,knots) (G:Var4) &gt;=
+        if{
+		(G:Var8) 2 ==
+		if{
+			1 (&gt;L:JELAIR_xml_Vspeed_sound_V1,enum)
+			3 (&gt;G:Var8) 
+		}
+	}
+
+        (A:AIRSPEED INDICATED,knots) (G:Var5) &gt;=
+        if{
+		(G:Var8) 3 ==
+		if{
+			1 (&gt;L:JELAIR_xml_Vspeed_sound_Vr,enum)
+			4 (&gt;G:Var8) 
+		}
+	}
+
+        (A:AIRSPEED INDICATED,knots) (G:Var6) &gt;=
+        if{
+		(G:Var8) 4 ==
+		if{
+			1 (&gt;L:JELAIR_xml_Vspeed_sound_V2,enum)
+			5 (&gt;G:Var8) 
+		}
+	}
+
+
+
+	}
+	</Value></Select></Element>
+	</Element>
+	<Comment>Vspeed audio callout</Comment>
+	<Comment>
+(G:Var1) is payload+fuel weight
+(G:Var2) is generic default V1 speed (same for all aircraft)
+(G:Var3) is the estimated flaps0 V1 speed (based on aircraft weight)
+
+(G:Var4) is V1 speed
+(G:Var5) is Vr speed
+(G:Var6) is V2 speed
+
+(G:Var7) is flaps storage variable
+
+(G:Var8) is speed-lock (so the same sound isnt played twice)
+(G:Var9) is gauge on/off master-check
+</Comment>
+	<Mouse>
+		<Area Left="0" Right="250" Top="0" Bottom="25">
+			<Cursor Type="Hand"/>
+			<Click> 1 (&gt;L:JELAIR_xml_Vspeed_sound_check,enum) </Click>
+		</Area>
+	</Mouse>
+</Gauge>
